@@ -1,0 +1,922 @@
+cat > /workspaces/linkedin-headline-optimizer/index.html << 'EOF'
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkedIn Headline Pro - Professional Headline Optimizer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --li-blue: #0a66c2;
+            --li-dark: #004182;
+            --surface: #f8fafc;
+            --card: #ffffff;
+            --border: #e2e8f0;
+            --text: #0f172a;
+            --muted: #64748b;
+            --subtle: #94a3b8;
+            --accent: #0ea5e9;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.04);
+            --shadow-lg: 0 8px 32px rgba(0,0,0,.08);
+            --radius: 16px;
+            --radius-sm: 10px;
+            --ig-gradient: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+        }
+
+        body {
+            font-family: 'Sora', sans-serif;
+            background: var(--surface);
+            color: var(--text);
+            min-height: 100vh;
+            background-image: radial-gradient(circle at 20% 20%, rgba(10,102,194,.04) 0%, transparent 60%),
+                              radial-gradient(circle at 80% 80%, rgba(14,165,233,.04) 0%, transparent 60%);
+        }
+
+        /* ─── HEADER ─── */
+        header {
+            text-align: center;
+            padding: 52px 24px 40px;
+        }
+        .logo-mark {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--li-blue);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+        .logo-mark svg { width: 14px; height: 14px; fill: white; }
+        h1 {
+            font-size: clamp(28px, 5vw, 42px);
+            font-weight: 800;
+            color: var(--text);
+            line-height: 1.1;
+            letter-spacing: -.02em;
+            margin-bottom: 10px;
+        }
+        h1 span {
+            background: linear-gradient(135deg, var(--li-blue), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .sub {
+            font-size: 15px;
+            color: var(--muted);
+            font-weight: 400;
+            max-width: 480px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* ─── LAYOUT ─── */
+        .container { max-width: 1040px; margin: 0 auto; padding: 0 20px 40px; }
+        .grid { display: grid; grid-template-columns: 1fr 340px; gap: 20px; }
+        @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
+
+        /* ─── CARD ─── */
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow);
+        }
+        .card-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            color: var(--subtle);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+        .card-title-icon {
+            width: 28px; height: 28px;
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        /* ─── EDITOR CARD ─── */
+        .editor-card { margin-bottom: 20px; }
+        .editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+        .editor-meta { display: flex; align-items: center; gap: 10px; }
+
+        #charCounter {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background: #eff6ff;
+            color: var(--li-blue);
+            transition: all .2s;
+        }
+        #charCounter.warn { background: #fefce8; color: var(--warning); }
+        #charCounter.over { background: #fef2f2; color: var(--danger); }
+
+        #headlineInput {
+            width: 100%;
+            min-height: 120px;
+            resize: vertical;
+            background: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            font-family: 'Sora', sans-serif;
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--text);
+            line-height: 1.6;
+            outline: none;
+            transition: border-color .2s, box-shadow .2s;
+        }
+        #headlineInput:focus {
+            border-color: var(--li-blue);
+            box-shadow: 0 0 0 3px rgba(10,102,194,.1);
+        }
+        #headlineInput::placeholder { color: var(--subtle); font-weight: 400; }
+
+        /* ─── PROGRESS BAR ─── */
+        .progress-track {
+            height: 4px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+        #progressFill {
+            height: 100%;
+            border-radius: 4px;
+            background: linear-gradient(90deg, var(--li-blue), var(--accent));
+            transition: width .3s ease, background .2s;
+            width: 0%;
+        }
+        #progressFill.warn { background: linear-gradient(90deg, var(--warning), #fbbf24); }
+        #progressFill.over { background: var(--danger); }
+
+        /* ─── TOOLBAR ─── */
+        .toolbar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 14px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .15s;
+            border: none;
+            font-family: 'Sora', sans-serif;
+        }
+        .btn:active { transform: scale(.97); }
+        .btn-ghost {
+            background: var(--surface);
+            color: var(--muted);
+            border: 1px solid var(--border);
+        }
+        .btn-ghost:hover { background: var(--border); color: var(--text); }
+        .btn-primary { background: var(--li-blue); color: white; }
+        .btn-primary:hover { background: var(--li-dark); }
+        .btn-dark { background: var(--text); color: white; }
+        .btn-dark:hover { background: #1e293b; }
+        .btn-danger-ghost { background: transparent; color: var(--subtle); border: none; padding: 8px; border-radius: 8px; cursor: pointer; transition: all .15s; }
+        .btn-danger-ghost:hover { background: #fef2f2; color: var(--danger); }
+        .divider-btn { font-family: 'JetBrains Mono', monospace; }
+        .divider-sep { width: 1px; height: 28px; background: var(--border); margin: 0 4px; }
+
+        /* ─── KEYWORD HUB ─── */
+        .domain-tabs {
+            display: flex;
+            gap: 4px;
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 4px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .domain-tabs::-webkit-scrollbar { display: none; }
+        .tab-btn {
+            flex: 1;
+            min-width: 80px;
+            padding: 7px 10px;
+            border-radius: 7px;
+            font-size: 11px;
+            font-weight: 600;
+            text-align: center;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            color: var(--muted);
+            transition: all .18s;
+            font-family: 'Sora', sans-serif;
+        }
+        .tab-btn.active {
+            background: var(--card);
+            color: var(--li-blue);
+            box-shadow: 0 1px 4px rgba(0,0,0,.1);
+        }
+        #keywordGrid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .kw-tag {
+            padding: 7px 13px;
+            border-radius: 20px;
+            background: var(--surface);
+            border: 1.5px solid var(--border);
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--muted);
+            cursor: pointer;
+            transition: all .18s;
+            font-family: 'Sora', sans-serif;
+        }
+        .kw-tag:hover {
+            background: #eff6ff;
+            border-color: var(--li-blue);
+            color: var(--li-blue);
+            transform: translateY(-1px);
+            box-shadow: 0 3px 8px rgba(10,102,194,.12);
+        }
+        .kw-tag:active { transform: scale(.96); }
+        .template-tag {
+            font-size: 11px;
+            padding: 10px 15px;
+            text-align: left;
+            white-space: normal;
+            line-height: 1.4;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+        }
+        .kw-hint {
+            font-size: 10px;
+            color: var(--subtle);
+            margin-top: 12px;
+            font-style: italic;
+        }
+
+        /* ─── RIGHT COLUMN ─── */
+        .right-col { display: flex; flex-direction: column; gap: 20px; }
+
+        /* ─── PREVIEW CARD ─── */
+        .preview-mock {
+            background: #f0f4f8;
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            min-height: 80px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        .avatar-mock {
+            width: 44px; height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #cbd5e1, #94a3b8);
+            flex-shrink: 0;
+        }
+        .profile-text { flex: 1; }
+        .name-mock {
+            height: 12px; width: 130px;
+            background: #cbd5e1;
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+        #livePreview {
+            font-size: 13px;
+            line-height: 1.5;
+            color: var(--text);
+            word-break: break-word;
+            min-height: 36px;
+        }
+        #livePreview.empty { color: var(--subtle); font-style: italic; }
+
+        /* ─── COPY BTN ─── */
+        #copyBtn {
+            width: 100%;
+            padding: 14px;
+            background: var(--li-blue);
+            color: white;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-family: 'Sora', sans-serif;
+            transition: all .2s;
+            margin-top: 16px;
+        }
+        #copyBtn:hover { background: var(--li-dark); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(10,102,194,.3); }
+        #copyBtn:active { transform: translateY(0); }
+        #copyBtn.copied { background: var(--success); }
+
+        /* ─── HEALTH CARD ─── */
+        .health-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px;
+            border-radius: var(--radius-sm);
+            transition: all .2s;
+        }
+        .health-item.bad { background: #fefce8; }
+        .health-item.good { background: #f0fdf4; }
+        .health-item.warn { background: #fef3c7; }
+        .health-icon {
+            width: 32px; height: 32px;
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            font-size: 15px;
+        }
+        .health-item.bad .health-icon { background: #fef3c7; }
+        .health-item.good .health-icon { background: #dcfce7; }
+        .health-item.warn .health-icon { background: #fef3c7; }
+        .health-label { font-size: 12px; font-weight: 700; margin-bottom: 2px; }
+        .health-item.bad .health-label { color: #92400e; }
+        .health-item.good .health-label { color: #065f46; }
+        .health-item.warn .health-label { color: #92400e; }
+        .health-desc { font-size: 11px; color: var(--muted); line-height: 1.5; }
+        .health-list { display: flex; flex-direction: column; gap: 8px; }
+
+        /* ─── FOOTER ─── */
+        footer {
+            margin-top: 40px;
+            padding: 40px 20px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+        }
+        .footer-content { max-width: 1040px; margin: 0 auto; }
+        .footer-tagline { font-size: 14px; color: var(--muted); margin-bottom: 20px; font-weight: 500; }
+        .social-links { display: flex; justify-content: center; align-items: center; gap: 12px; flex-wrap: wrap; }
+        
+        .social-btn {
+            height: 44px;
+            padding: 0 16px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all .2s;
+            border: 1px solid var(--border);
+            background: var(--card);
+            color: var(--text);
+        }
+        .social-btn:hover { border-color: var(--li-blue); color: var(--li-blue); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,.05); }
+        .social-btn.linkedin { background: #eff6ff; border-color: #bfdbfe; color: var(--li-blue); }
+        .social-btn.linkedin:hover { background: var(--li-blue); color: white; border-color: var(--li-blue); }
+        .social-btn.instagram { border: none; background: var(--ig-gradient); color: white; }
+        .social-btn.instagram:hover { filter: brightness(1.1); }
+        
+        .footer-copyright { margin-top: 30px; font-size: 11px; color: var(--subtle); font-weight: 500; letter-spacing: 0.05em; }
+
+        /* ─── MODAL (INSTAGRAM) ─── */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(8px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 1000;
+            opacity: 0; visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        
+        .ig-modal {
+            width: 90%; max-width: 360px;
+            background: white;
+            border-radius: 24px;
+            overflow: hidden;
+            transform: scale(0.9) translateY(20px);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        .modal-overlay.active .ig-modal { transform: scale(1) translateY(0); }
+        
+        .ig-header {
+            background: var(--ig-gradient);
+            padding: 30px 20px;
+            text-align: center;
+            color: white;
+            position: relative;
+        }
+        .close-modal {
+            position: absolute; top: 12px; right: 12px;
+            background: rgba(255,255,255,0.2);
+            border: none; color: white; width: 28px; height: 28px;
+            border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;
+        }
+        .ig-avatar {
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            border: 4px solid white;
+            margin: 0 auto 12px;
+            object-fit: cover;
+            background: #eee;
+        }
+        .ig-handle { font-weight: 800; font-size: 18px; letter-spacing: -0.01em; }
+        
+        .ig-body { padding: 24px; display: flex; flex-direction: column; gap: 12px; }
+        .ig-link-btn {
+            width: 100%; padding: 14px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            background: #fafafa;
+            color: var(--text);
+            font-size: 14px; font-weight: 700;
+            display: flex; align-items: center; gap: 12px;
+            cursor: pointer; text-decoration: none;
+            transition: all 0.2s;
+        }
+        .ig-link-btn:hover { background: #f0f0f0; transform: translateX(4px); }
+        .ig-link-btn.primary { background: var(--ig-gradient); color: white; border: none; }
+        
+        .toast {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px);
+            background: var(--text); color: white; padding: 10px 20px;
+            border-radius: 40px; font-size: 12px; font-weight: 600;
+            z-index: 2000; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .toast.active { transform: translateX(-50%) translateY(0); }
+
+        /* ─── ANIMATIONS ─── */
+        @keyframes pop-in {
+            from { transform: scale(.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .kw-tag { animation: pop-in .18s ease both; }
+        .card { animation: pop-in .3s ease both; }
+
+        /* scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 6px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo-mark">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+        Headline Pro
+    </div>
+    <h1>Craft Your Perfect<br><span>LinkedIn Headline</span></h1>
+    <p class="sub">Build SEO-friendly headlines with smart keywords, unicode styling, and live preview — for professionals in all industries.</p>
+</header>
+
+<div class="container">
+    <div class="grid">
+        <!-- LEFT -->
+        <div class="left-col">
+            <div class="card editor-card">
+                <div class="editor-header">
+                    <span class="card-title" style="margin-bottom:0">
+                        <div class="card-title-icon" style="background:#eff6ff">✏️</div>
+                        Headline Editor
+                    </span>
+                    <div class="editor-meta">
+                        <span id="charCounter">0 / 220</span>
+                        <button class="btn-danger-ghost" onclick="clearAll()" title="Clear">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                        </button>
+                    </div>
+                </div>
+                <textarea id="headlineInput" rows="4" placeholder="e.g. Senior Data Analyst | Power BI Expert | Turning Data into Decisions"></textarea>
+                <div class="progress-track"><div id="progressFill"></div></div>
+                <div class="toolbar">
+                    <button class="btn btn-ghost divider-btn" onclick="insertText(' | ')">Insert <strong style="color:var(--li-blue)">|</strong> Divider</button>
+                    <div class="divider-sep"></div>
+                    <button class="btn btn-primary" onclick="doTransform('boldSans')"><span style="font-family:monospace;font-size:11px">𝗔</span> Bold Sans</button>
+                    <button class="btn btn-dark" onclick="doTransform('boldSerif')"><span style="font-family:monospace;font-size:11px">𝐀</span> Bold Serif</button>
+                    <button class="btn btn-ghost" onclick="doTransform('italicSans')"><span style="font-family:monospace;font-size:11px">𝘈</span> Italic Sans</button>
+                    <button class="btn btn-ghost" onclick="doTransform('italicSerif')"><span style="font-family:monospace;font-size:11px">𝐴</span> Italic Serif</button>
+                    <div class="divider-sep"></div>
+                    <button class="btn btn-ghost" onclick="saveHeadline()" title="Save current headline">💾 Save</button>
+                    <button class="btn btn-ghost" onclick="loadHeadline()" title="Load saved headline">📂 Load</button>
+                    <button class="btn btn-ghost" onclick="undoTransform()" title="Reset to plain text" style="margin-left:auto">↩ Reset Style</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title"><div class="card-title-icon" style="background:#fffbeb">✨</div>Trending Keywords</div>
+                <div class="domain-tabs" id="domainTabs">
+                    <button class="tab-btn active" data-domain="data" onclick="switchDomain(this)">📊 Data & Analytics</button>
+                    <button class="tab-btn" data-domain="business" onclick="switchDomain(this)">💼 Business</button>
+                    <button class="tab-btn" data-domain="marketing" onclick="switchDomain(this)">📣 Marketing</button>
+                    <button class="tab-btn" data-domain="software" onclick="switchDomain(this)">⚙️ Engineering</button>
+                    <button class="tab-btn" data-domain="healthcare" onclick="switchDomain(this)">🏥 Healthcare</button>
+                    <button class="tab-btn" data-domain="finance" onclick="switchDomain(this)">💰 Finance</button>
+                    <button class="tab-btn" data-domain="sales" onclick="switchDomain(this)">🎯 Sales</button>
+                    <button class="tab-btn" data-domain="hr" onclick="switchDomain(this)">👥 HR</button>
+                    <button class="tab-btn" data-domain="design" onclick="switchDomain(this)">🎨 Design</button>
+                    <button class="tab-btn" data-domain="creative" onclick="switchDomain(this)">✨ Creative</button>
+                    <button class="tab-btn" data-domain="education" onclick="switchDomain(this)">📚 Education</button>
+                    <button class="tab-btn" data-domain="legal" onclick="switchDomain(this)">⚖️ Legal</button>
+                </div>
+                <input type="text" id="keywordSearch" placeholder="Search keywords..." style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;margin-bottom:12px;font-family:'Sora',sans-serif;" oninput="filterKeywords()">
+                <div id="keywordGrid"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-title"><div class="card-title-icon" style="background:#f0f9ff">📝</div>Headline Templates</div>
+                <div id="templateGrid"></div>
+            </div>
+        </div>
+
+        <!-- RIGHT -->
+        <div class="right-col">
+            <div class="card">
+                <div class="card-title"><div class="card-title-icon" style="background:#eff6ff">👁️</div>Live Preview</div>
+                <div class="preview-mock">
+                    <div class="avatar-mock"></div>
+                    <div class="profile-text"><div class="name-mock"></div><div id="livePreview" class="empty">Your headline will appear here…</div></div>
+                </div>
+                <button id="copyBtn" onclick="copyToClipboard()"><span id="copyLabel">Copy to Clipboard</span></button>
+            </div>
+
+            <div class="card">
+                <div class="card-title"><div class="card-title-icon" style="background:#f0fdf4">🩺</div>Profile Health</div>
+                <div class="health-list" id="healthList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="footer-content">
+            <p class="footer-tagline">Developed with precision for the modern professional.</p>
+            <div class="social-links">
+                <a href="https://www.linkedin.com/in/harsh-kashyap-bioinformatics" target="_blank" class="social-btn linkedin">
+                    <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.238 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                    LinkedIn
+                </a>
+                <button onclick="toggleModal(true)" class="social-btn instagram">
+                    <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                    @imharsh_08
+                </button>
+                <a href="tel:+917351534994" class="social-btn">
+                    📞 +91 7351...
+                </a>
+                <a href="mailto:harshconnect6@gmail.com" class="social-btn">
+                    ✉️ Email
+                </a>
+            </div>
+            <p class="footer-copyright">© 2024 HARSH KASHYAP · DATA ARCHITECT & ANALYST</p>
+        </div>
+    </footer>
+</div>
+
+<!-- INSTAGRAM MODAL -->
+<div class="modal-overlay" id="igModal" onclick="if(event.target === this) toggleModal(false)">
+    <div class="ig-modal">
+        <div class="ig-header">
+            <button class="close-modal" onclick="toggleModal(false)">✕</button>
+            <div class="ig-avatar" style="background: url('https://api.dicebear.com/7.x/avataaars/svg?seed=Harsh') center/cover;"></div>
+            <div class="ig-handle">@imharsh_08</div>
+            <div style="font-size: 12px; opacity: 0.8; margin-top: 4px;">Connect with me on Instagram</div>
+        </div>
+        <div class="ig-body">
+            <a href="https://www.instagram.com/imharsh_08/?utm_source=headline_pro" target="_blank" class="ig-link-btn primary">
+                🚀 Open Instagram Profile
+            </a>
+            <button onclick="copyToClipboardGeneric('https://www.instagram.com/imharsh_08/')" class="ig-link-btn">
+                🔗 Copy Profile Link
+            </button>
+            <button onclick="shareProfile()" class="ig-link-btn">
+                📤 Share with Friends
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="toast" class="toast">Link copied to clipboard!</div>
+
+<script>
+const KEYWORDS = {
+    data: ["Data Analyst", "Business Intelligence", "Python", "SQL Expert", "Power BI", "Looker Studio", "AppSheet Developer", "Big Data", "Data Visualization", "ETL Pipelines", "Tableau", "Machine Learning", "Data Science", "Analytics", "Reporting"],
+    business: ["Business Analyst", "Product Manager", "Project Lead", "Strategy", "Operations", "Consultant", "MIS Specialist", "Supply Chain", "FinTech", "Process Optimization", "Agile", "Scrum Master", "Change Management"],
+    marketing: ["SEO Specialist", "Digital Marketer", "Growth Hacker", "Content Strategy", "Performance Marketing", "Brand Manager", "SaaS Marketing", "Email Marketing", "CRO Expert", "Social Media", "PPC", "Influencer Marketing"],
+    software: ["Full Stack Dev", "DevOps Engineer", "Backend Engineer", "Cloud Architect", "AWS", "React.js", "System Design", "Agile", "TypeScript", "Microservices", "API Development", "Docker", "Kubernetes"],
+    healthcare: ["Healthcare Analyst", "Clinical Data", "EHR Systems", "Medical Informatics", "Patient Care", "Healthcare IT", "Biostatistics", "Public Health", "Telemedicine", "Regulatory Compliance"],
+    education: ["Education Technology", "EdTech", "Learning Management", "Curriculum Design", "Educational Data", "Student Success", "Online Learning", "Academic Research", "Teaching Excellence"],
+    finance: ["Financial Analyst", "Investment Banking", "Risk Management", "Financial Modeling", "Corporate Finance", "Wealth Management", "FinTech", "Blockchain", "Cryptocurrency", "Compliance"],
+    sales: ["Sales Executive", "Business Development", "Account Management", "Sales Operations", "CRM Expert", "Lead Generation", "Revenue Growth", "Customer Success", "Sales Analytics"],
+    hr: ["HR Business Partner", "Talent Acquisition", "Employee Experience", "People Operations", "Diversity & Inclusion", "Learning & Development", "HR Analytics", "Compensation", "Workforce Planning"],
+    design: ["UX Designer", "UI Designer", "Product Designer", "Graphic Designer", "Brand Identity", "Design Systems", "User Research", "Prototyping", "Visual Design", "Creative Direction"],
+    creative: ["Content Creator", "Video Production", "Social Media", "Digital Storytelling", "Creative Strategy", "Brand Storytelling", "Multimedia", "Art Direction", "Copywriting"],
+    legal: ["Legal Counsel", "Compliance Officer", "Contract Management", "Intellectual Property", "Data Privacy", "Regulatory Affairs", "Legal Technology", "Risk Assessment"]
+};
+
+const TEMPLATES = {
+    data: [
+        "Data Analyst | Power BI Expert | Turning Data into Decisions",
+        "Business Intelligence Analyst | SQL | Tableau | Data Visualization",
+        "Senior Data Scientist | Python | Machine Learning | Analytics",
+        "Data Engineer | ETL Pipelines | Big Data | Cloud Solutions"
+    ],
+    business: [
+        "Business Analyst | Process Optimization | Strategy Consultant",
+        "Product Manager | Agile | User-Centric Solutions",
+        "Operations Manager | Supply Chain | Efficiency Expert",
+        "Management Consultant | Change Management | Business Transformation"
+    ],
+    marketing: [
+        "Digital Marketing Specialist | SEO | Content Strategy",
+        "Growth Hacker | Performance Marketing | SaaS Expert",
+        "Brand Manager | Social Media | Creative Direction",
+        "Marketing Analyst | Data-Driven Campaigns | CRO Specialist"
+    ],
+    software: [
+        "Full Stack Developer | React.js | Node.js | Cloud Architect",
+        "DevOps Engineer | AWS | Docker | CI/CD Pipelines",
+        "Backend Engineer | Microservices | API Development | TypeScript",
+        "Software Architect | System Design | Scalable Solutions"
+    ],
+    healthcare: [
+        "Healthcare Data Analyst | EHR Systems | Patient Care Optimization",
+        "Clinical Informatics Specialist | Medical Data | Telemedicine",
+        "Healthcare IT Manager | Regulatory Compliance | Digital Health",
+        "Biostatistician | Clinical Research | Public Health Analytics"
+    ],
+    finance: [
+        "Financial Analyst | Financial Modeling | Investment Banking",
+        "Risk Management Specialist | FinTech | Regulatory Compliance",
+        "Corporate Finance Manager | M&A | Strategic Planning",
+        "Wealth Management Advisor | Investment Strategies | Client Success"
+    ],
+    sales: [
+        "Sales Executive | B2B Sales | Revenue Growth | CRM Expert",
+        "Business Development Manager | Lead Generation | Account Management",
+        "Sales Operations Analyst | Sales Analytics | Process Optimization",
+        "Customer Success Manager | Retention | Client Relationships"
+    ],
+    hr: [
+        "HR Business Partner | Talent Acquisition | Employee Experience",
+        "People Operations Manager | Diversity & Inclusion | Culture Building",
+        "Learning & Development Specialist | Training Programs | Skill Development",
+        "HR Analyst | Workforce Planning | Compensation Strategy"
+    ],
+    design: [
+        "UX Designer | User Research | Prototyping | Design Systems",
+        "Product Designer | UI/UX | User-Centric Design | Figma Expert",
+        "Graphic Designer | Brand Identity | Visual Communication",
+        "Creative Director | Design Strategy | Team Leadership"
+    ],
+    creative: [
+        "Content Creator | Video Production | Social Media Storytelling",
+        "Digital Content Strategist | Brand Storytelling | Multimedia",
+        "Social Media Manager | Community Building | Engagement",
+        "Creative Producer | Campaign Development | Cross-Platform Content"
+    ],
+    education: [
+        "Education Technology Specialist | EdTech | Online Learning",
+        "Curriculum Designer | Educational Innovation | Student Success",
+        "Learning Experience Designer | Instructional Design | E-Learning",
+        "Academic Technology Coordinator | Digital Education | LMS"
+    ],
+    legal: [
+        "Legal Counsel | Contract Management | Intellectual Property",
+        "Compliance Officer | Regulatory Affairs | Risk Assessment",
+        "Legal Technology Specialist | Legal Analytics | Process Automation",
+        "Data Privacy Officer | GDPR | Information Security"
+    ]
+};
+
+const MAPS = {
+    boldSans: {A:'𝗔',B:'𝗕',C:'𝗖',D:'𝗗',E:'𝗘',F:'𝗙',G:'𝗚',H:'𝗛',I:'𝗜',J:'𝗝',K:'𝗞',L:'𝗟',M:'𝗠',N:'𝗡',O:'𝗢',P:'𝗣',Q:'𝗤',R:'𝗥',S:'𝗦',T:'𝗧',U:'𝗨',V:'𝗩',W:'𝗪',X:'𝗫',Y:'𝗬',Z:'𝗭',a:'𝗮',b:'𝗯',c:'𝗰',d:'𝗱',e:'𝗲',f:'𝗳',g:'𝗴',h:'𝗵',i:'𝗶',j:'𝗷',k:'𝗸',l:'𝗹',m:'𝗺',n:'𝗻',o:'𝗼',p:'𝗽',q:'�',r:'𝗿',s:'𝘀',t:'𝘁',u:'𝘂',v:'𝘃',w:'𝘄',x:'𝘅',y:'𝘆',z:'𝘇'},
+    boldSerif: {A:'𝐀',B:'𝐁',C:'𝐂',D:'𝐃',E:'𝐄',F:'𝐅',G:'𝐆',H:'𝐇',I:'𝐈',J:'𝐉',K:'𝐊',L:'𝐋',M:'𝐌',N:'𝐍',O:'𝐎',P:'𝐏',Q:'𝐐',R:'𝐑',S:'𝐒',T:'𝐓',U:'𝐔',V:'𝐕',W:'𝐖',X:'𝐗',Y:'𝐘',Z:'𝐙',a:'𝐚',b:'𝐛',c:'𝐜',d:'𝐝',e:'𝐞',f:'𝐟',g:'𝐠',h:'𝐡',i:'𝐢',j:'𝐣',k:'𝐤',l:'𝐥',m:'𝐦',n:'𝐧',o:'𝐨',p:'𝐩',q:'𝐪',r:'𝐫',s:'𝐬',t:'𝐭',u:'𝐮',v:'𝐯',w:'𝐰',x:'𝐱',y:'𝐲',z:'𝐳'},
+    italicSans: {A:'𝘈',B:'𝘉',C:'𝘊',D:'𝘋',E:'𝘌',F:'𝘍',G:'𝘎',H:'𝘏',I:'𝘐',J:'𝘑',K:'𝘒',L:'𝘓',M:'𝘔',N:'𝘕',O:'𝘖',P:'𝘗',Q:'𝘘',R:'𝘙',S:'𝘚',T:'𝘛',U:'𝘜',V:'𝘝',W:'𝘞',X:'𝘟',Y:'𝘠',Z:'𝘡',a:'𝘢',b:'𝘣',c:'𝘤',d:'𝘥',e:'𝘦',f:'𝘧',g:'𝘨',h:'𝘩',i:'𝘪',j:'𝘫',k:'𝘬',l:'𝘭',m:'𝘮',n:'𝘯',o:'𝘰',p:'𝘱',q:'𝘲',r:'𝘳',s:'𝘴',t:'𝘵',u:'𝘶',v:'𝘷',w:'𝘸',x:'𝘹',y:'𝘺',z:'𝘻'},
+    italicSerif: {A:'𝐴',B:'𝐵',C:'𝐶',D:'𝐷',E:'𝐸',F:'𝐹',G:'𝐺',H:'𝐻',I:'𝐼',J:'𝐽',K:'𝐾',L:'𝐿',M:'𝑀',N:'𝑁',O:'𝑂',P:'𝑃',Q:'𝑄',R:'𝑅',S:'𝑆',T:'𝑇',U:'𝑈',V:'𝑉',W:'𝑊',X:'𝑋',Y:'𝑌',Z:'𝑍',a:'𝑎',b:'𝑏',c:'𝑐',d:'𝑑',e:'𝑒',f:'𝑓',g:'𝑔',h:'ℎ',i:'𝑖',j:'𝑗',k:'𝑘',l:'𝑙',m:'𝑚',n:'𝑛',o:'𝑜',p:'𝑝',q:'𝑞',r:'𝑟',s:'𝑠',t:'𝑡',u:'𝑢',v:'𝑣',w:'𝑤',x:'𝑥',y:'𝑦',z:'𝑧'}
+};
+
+let currentDomain = 'data';
+const input = document.getElementById('headlineInput');
+const preview = document.getElementById('livePreview');
+const counter = document.getElementById('charCounter');
+const progress = document.getElementById('progressFill');
+const healthList = document.getElementById('healthList');
+const copyBtn = document.getElementById('copyBtn');
+const copyLabel = document.getElementById('copyLabel');
+
+function insertText(text) {
+    const s = input.selectionStart, e = input.selectionEnd;
+    input.value = input.value.slice(0, s) + text + input.value.slice(e);
+    input.selectionStart = input.selectionEnd = s + text.length;
+    input.focus();
+    updateAll();
+}
+
+function doTransform(type) {
+    const s = input.selectionStart, e = input.selectionEnd;
+    const target = s !== e ? input.value.slice(s, e) : input.value;
+    if (!target) return;
+    const result = [...target].map(c => MAPS[type][c] || c).join('');
+    if (s !== e) input.value = input.value.slice(0, s) + result + input.value.slice(e);
+    else input.value = result;
+    updateAll();
+}
+
+function undoTransform() {
+    const text = input.value;
+    let out = '';
+    for (const ch of text) {
+        const cp = ch.codePointAt(0);
+        if (cp >= 0x1D400 && cp <= 0x1D7FF) out += String.fromCodePoint(plainMap(cp));
+        else out += ch;
+    }
+    input.value = out;
+    updateAll();
+}
+
+function plainMap(cp) {
+    const ranges = [
+        [0x1D400, 0x1D419, 65], [0x1D41A, 0x1D433, 97], // bold serif
+        [0x1D5D4, 0x1D5ED, 65], [0x1D5EE, 0x1D607, 97], // bold sans
+        [0x1D56C, 0x1D585, 65], [0x1D586, 0x1D59F, 97], // bold sans alt?
+        [0x1D434, 0x1D44D, 65], [0x1D44E, 0x1D467, 97], // italic serif
+        [0x1D608, 0x1D621, 65], [0x1D622, 0x1D63B, 97]  // italic sans
+    ];
+    for (const [start, end, base] of ranges) if (cp >= start && cp <= end) return base + (cp - start);
+    return cp;
+}
+
+function switchDomain(btn) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentDomain = btn.dataset.domain;
+    renderKeywords();
+}
+
+function renderKeywords() {
+    const grid = document.getElementById('keywordGrid');
+    const searchTerm = document.getElementById('keywordSearch').value.toLowerCase();
+    const filteredKeywords = KEYWORDS[currentDomain].filter(kw => kw.toLowerCase().includes(searchTerm));
+    grid.innerHTML = '';
+    filteredKeywords.forEach((kw, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'kw-tag';
+        btn.style.animationDelay = (i * 30) + 'ms';
+        btn.textContent = kw;
+        btn.onclick = () => {
+            insertText((input.value.trim() ? ' | ' : '') + kw);
+            btn.style.background = '#dcfce7';
+            setTimeout(() => btn.style.background = '', 1000);
+        };
+        grid.appendChild(btn);
+    });
+    renderTemplates();
+}
+
+function filterKeywords() {
+    renderKeywords();
+}
+
+function renderTemplates() {
+    const grid = document.getElementById('templateGrid');
+    grid.innerHTML = '';
+    TEMPLATES[currentDomain].forEach((tmpl, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'kw-tag template-tag';
+        btn.style.animationDelay = (i * 30 + 200) + 'ms';
+        btn.innerHTML = tmpl.replace(/\|/g, '<span style="color:var(--li-blue)">|</span>');
+        btn.onclick = () => {
+            input.value = tmpl;
+            updateAll();
+            btn.style.background = '#dbeafe';
+            setTimeout(() => btn.style.background = '', 1000);
+        };
+        grid.appendChild(btn);
+    });
+}
+
+function clearAll() { input.value = ''; updateAll(); }
+
+function saveHeadline() {
+    if (!input.value.trim()) return;
+    localStorage.setItem('linkedinHeadline', input.value);
+    showToast("Headline saved! 💾");
+}
+
+function loadHeadline() {
+    const saved = localStorage.getItem('linkedinHeadline');
+    if (saved) {
+        input.value = saved;
+        updateAll();
+        showToast("Headline loaded! 📂");
+    } else {
+        showToast("No saved headline found.");
+    }
+}
+
+function updateAll() {
+    const val = input.value, len = val.length;
+    preview.textContent = val.trim() ? val : 'Your headline will appear here…';
+    preview.className = val.trim() ? '' : 'empty';
+    const pct = (len / 220) * 100;
+    counter.textContent = `${len} / 220`;
+    counter.className = pct >= 100 ? 'over' : pct >= 80 ? 'warn' : '';
+    progress.style.width = Math.min(pct, 100) + '%';
+    progress.className = pct >= 100 ? 'over' : pct >= 80 ? 'warn' : '';
+    renderHealth(val, len, pct);
+}
+
+function renderHealth(val, len, pct) {
+    const items = [];
+    if (!val.trim()) items.push({ type: 'good', icon: '✅', label: 'Waiting for input', desc: 'Start typing to see health checks.' });
+    else {
+        if (pct > 100) items.push({ type: 'bad', icon: '🚨', label: 'Too Long!', desc: `${len - 220} chars over limit.` });
+        else if (len < 60) items.push({ type: 'bad', icon: '⚠️', label: 'Too Short', desc: 'Aim for 120-180 chars for best visibility.' });
+        else if (len > 180) items.push({ type: 'warn', icon: '⚠️', label: 'Getting Long', desc: 'Consider shortening for mobile display.' });
+        else items.push({ type: 'good', icon: '🎯', label: 'Great Length', desc: 'Perfect for all devices.' });
+        
+        const pipeCount = (val.match(/\|/g) || []).length;
+        if (pipeCount === 0) items.push({ type: 'warn', icon: '⚠️', label: 'No Dividers', desc: 'Use | to separate skills/roles.' });
+        else if (pipeCount > 5) items.push({ type: 'bad', icon: '🚨', label: 'Too Many Dividers', desc: 'Simplify your headline.' });
+        else items.push({ type: 'good', icon: '✨', label: 'Good Structure', desc: `${pipeCount} divider${pipeCount > 1 ? 's' : ''} used.` });
+        
+        const keywordCount = KEYWORDS[currentDomain].filter(kw => val.toLowerCase().includes(kw.toLowerCase())).length;
+        if (keywordCount === 0) items.push({ type: 'warn', icon: '🔍', label: 'No Keywords', desc: 'Add trending keywords for better SEO.' });
+        else if (keywordCount >= 3) items.push({ type: 'good', icon: '🚀', label: 'Keyword Rich', desc: `${keywordCount} trending keywords found.` });
+        else items.push({ type: 'good', icon: '👍', label: 'Some Keywords', desc: `${keywordCount} keyword${keywordCount > 1 ? 's' : ''} detected.` });
+        
+        if (/[^\u0000-\u00ff]/.test(val)) items.push({ type: 'warn', icon: '⚠️', label: 'Unicode Styling', desc: 'May reduce ATS compatibility.' });
+        
+        if (val.includes('|') && !val.includes(' | ')) items.push({ type: 'warn', icon: '⚠️', label: 'Spacing', desc: 'Add spaces around | for better readability.' });
+    }
+    healthList.innerHTML = items.map(i => `<div class="health-item ${i.type}"><div class="health-icon">${i.icon}</div><div><div class="health-label">${i.label}</div><div class="health-desc">${i.desc}</div></div></div>`).join('');
+}
+
+async function copyToClipboard() {
+    if (!input.value) return;
+    try { await navigator.clipboard.writeText(input.value); } 
+    catch { input.select(); document.execCommand('copy'); }
+    copyBtn.classList.add('copied'); copyLabel.textContent = 'Copied! ✓';
+    setTimeout(() => { copyBtn.classList.remove('copied'); copyLabel.textContent = 'Copy to Clipboard'; }, 2000);
+}
+
+// SOCIAL & MODAL LOGIC
+function toggleModal(show) { document.getElementById('igModal').classList.toggle('active', show); }
+
+async function copyToClipboardGeneric(text) {
+    try { await navigator.clipboard.writeText(text); } 
+    catch { const el = document.createElement('textarea'); el.value = text; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el); }
+    showToast("Link copied to clipboard! ✅");
+}
+
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('active');
+    setTimeout(() => t.classList.remove('active'), 2500);
+}
+
+async function shareProfile() {
+    const shareData = { title: 'Harsh Kashyap - Instagram', text: 'Check out Harsh Kashyap profile!', url: 'https://www.instagram.com/imharsh_08/' };
+    if (navigator.share) { try { await navigator.share(shareData); } catch (err) { copyToClipboardGeneric(shareData.url); } } 
+    else { copyToClipboardGeneric(shareData.url); }
+}
+
+input.addEventListener('input', updateAll);
+renderKeywords();
+updateAll();
+</script>
+</body>
+</html>
+EOF
